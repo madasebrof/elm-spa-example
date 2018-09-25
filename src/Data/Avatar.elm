@@ -1,6 +1,6 @@
-module Avatar exposing (Avatar, decoder, encode, src, toMaybeString)
+module Data.Avatar exposing (Avatar, decoder, encode, src, toMaybeString)
 
-import Asset
+import Data.Asset
 import Html exposing (Attribute)
 import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
@@ -42,10 +42,10 @@ src : Avatar -> Attribute msg
 src (Avatar maybeUrl) =
     case maybeUrl of
         Nothing ->
-            Asset.src Asset.defaultAvatar
+            Data.Asset.src Data.Asset.defaultAvatar
 
         Just "" ->
-            Asset.src Asset.defaultAvatar
+            Data.Asset.src Data.Asset.defaultAvatar
 
         Just url ->
             Html.Attributes.src url

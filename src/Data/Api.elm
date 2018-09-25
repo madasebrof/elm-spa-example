@@ -1,4 +1,4 @@
-port module Api exposing (Cred, addServerError, application, decodeErrors, delete, get, login, logout, post, put, register, settings, storeCredWith, username, viewerChanges)
+port module Data.Api exposing (Cred, addServerError, application, decodeErrors, delete, get, login, logout, post, put, register, settings, storeCredWith, username, viewerChanges)
 
 {-| This module is responsible for communicating to the Conduit API.
 
@@ -6,10 +6,10 @@ It exposes an opaque Endpoint type which is guaranteed to point to the correct U
 
 -}
 
-import Api.Endpoint as Endpoint exposing (Endpoint)
-import Avatar exposing (Avatar)
 import Browser
 import Browser.Navigation as Nav
+import Data.Api.Endpoint as Endpoint exposing (Endpoint)
+import Data.Avatar exposing (Avatar)
 import Http exposing (Body, Expect)
 import Json.Decode as Decode exposing (Decoder, Value, decodeString, field, string)
 import Json.Decode.Pipeline as Pipeline exposing (optional, required)
@@ -104,7 +104,7 @@ storeCredWith (Cred uname token) avatar =
                   , Encode.object
                         [ ( "username", Username.encode uname )
                         , ( "token", Encode.string token )
-                        , ( "image", Avatar.encode avatar )
+                        , ( "image", Data.Avatar.encode avatar )
                         ]
                   )
                 ]

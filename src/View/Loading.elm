@@ -1,9 +1,9 @@
-module Loading exposing (error, icon, slowThreshold)
+module View.Loading exposing (error, icon, slowThreshold)
 
 {-| A loading spinner icon.
 -}
 
-import Asset
+import Data.Asset
 import Html exposing (Attribute, Html)
 import Html.Attributes exposing (alt, height, src, width)
 import Process
@@ -13,10 +13,10 @@ import Task exposing (Task)
 icon : Html msg
 icon =
     Html.img
-        [ Asset.src Asset.loading
+        [ Data.Asset.src Data.Asset.loading
         , width 64
         , height 64
-        , alt "Loading..."
+        , alt "View.Loading..."
         ]
         []
 

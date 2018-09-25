@@ -1,4 +1,4 @@
-module Asset exposing (Image, defaultAvatar, error, loading, src)
+module Data.Asset exposing (Image, defaultAvatar, error, loading, src)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 

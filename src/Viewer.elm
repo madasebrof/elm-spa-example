@@ -5,9 +5,9 @@ be able to render the menu bar (username and avatar), along with Cred so it's
 impossible to have a Viewer if you aren't logged in.
 -}
 
-import Api exposing (Cred)
-import Avatar exposing (Avatar)
-import Email exposing (Email)
+import Data.Api exposing (Cred)
+import Data.Avatar exposing (Avatar)
+import Data.Email exposing (Email)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, required)
 import Json.Encode as Encode exposing (Value)
@@ -34,7 +34,7 @@ cred (Viewer _ val) =
 
 username : Viewer -> Username
 username (Viewer _ val) =
-    Api.username val
+    Data.Api.username val
 
 
 avatar : Viewer -> Avatar
@@ -56,11 +56,11 @@ minPasswordChars =
 decoder : Decoder (Cred -> Viewer)
 decoder =
     Decode.succeed Viewer
-        |> custom (Decode.field "image" Avatar.decoder)
+        |> custom (Decode.field "image" Data.Avatar.decoder)
 
 
 store : Viewer -> Cmd msg
 store (Viewer avatarVal credVal) =
-    Api.storeCredWith
+    Data.Api.storeCredWith
         credVal
         avatarVal

@@ -1,4 +1,4 @@
-module Article exposing (Article, Full, Preview, author, body, favorite, favoriteButton, fetch, fromPreview, fullDecoder, mapAuthor, metadata, previewDecoder, slug, unfavorite, unfavoriteButton)
+module Data.Article exposing (Article, Full, Preview, author, body, favorite, favoriteButton, fetch, fromPreview, fullDecoder, mapAuthor, metadata, previewDecoder, slug, unfavorite, unfavoriteButton)
 
 {-| The interface to the Article data structure.
 
@@ -11,12 +11,12 @@ This includes:
 
 -}
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
 import Article.Body as Body exposing (Body)
 import Article.Slug as Slug exposing (Slug)
 import Article.Tag as Tag exposing (Tag)
-import Author exposing (Author)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Author exposing (Author)
 import Html exposing (Attribute, Html, i)
 import Html.Attributes exposing (class)
 import Html.Events exposing (stopPropagationOn)
@@ -186,7 +186,7 @@ internalsDecoder : Maybe Cred -> Decoder Internals
 internalsDecoder maybeCred =
     Decode.succeed Internals
         |> required "slug" Slug.decoder
-        |> required "author" (Author.decoder maybeCred)
+        |> required "author" (Data.Author.decoder maybeCred)
         |> custom metadataDecoder
 
 
@@ -208,7 +208,7 @@ metadataDecoder =
 fetch : Maybe Cred -> Slug -> Http.Request (Article Full)
 fetch maybeCred articleSlug =
     Decode.field "article" (fullDecoder maybeCred)
-        |> Api.get (Endpoint.article articleSlug) maybeCred
+        |> Data.Api.get (Endpoint.article articleSlug) maybeCred
 
 
 
@@ -217,12 +217,12 @@ fetch maybeCred articleSlug =
 
 favorite : Slug -> Cred -> Http.Request (Article Preview)
 favorite articleSlug cred =
-    Api.post (Endpoint.favorite articleSlug) (Just cred) Http.emptyBody (faveDecoder cred)
+    Data.Api.post (Endpoint.favorite articleSlug) (Just cred) Http.emptyBody (faveDecoder cred)
 
 
 unfavorite : Slug -> Cred -> Http.Request (Article Preview)
 unfavorite articleSlug cred =
-    Api.delete (Endpoint.favorite articleSlug) cred Http.emptyBody (faveDecoder cred)
+    Data.Api.delete (Endpoint.favorite articleSlug) cred Http.emptyBody (faveDecoder cred)
 
 
 faveDecoder : Cred -> Decoder (Article Preview)

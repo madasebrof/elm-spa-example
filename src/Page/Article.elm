@@ -3,23 +3,22 @@ module Page.Article exposing (Model, Msg, init, subscriptions, toSession, update
 {-| Viewing an individual article.
 -}
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
-import Article exposing (Article, Full, Preview)
 import Article.Body exposing (Body)
 import Article.Comment as Comment exposing (Comment)
 import Article.Slug as Slug exposing (Slug)
-import Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor)
-import Avatar
 import Browser.Navigation as Nav
-import CommentId exposing (CommentId)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Article as Article exposing (Article, Full, Preview)
+import Data.Author as Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor)
+import Data.Avatar
+import Data.CommentId exposing (CommentId)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Json.Decode as Decode
-import Loading
-import Log
+import Data.Log
 import Page
 import Profile exposing (Profile)
 import Route
@@ -28,6 +27,7 @@ import Task exposing (Task)
 import Time
 import Timestamp
 import Username exposing (Username)
+import View.Loading
 import Viewer exposing (Viewer)
 
 
@@ -76,7 +76,7 @@ init session slug =
         , Comment.list maybeCred slug
             |> Http.send CompletedLoadComments
         , Task.perform GotTimeZone Time.here
-        , Task.perform (\_ -> PassedSlowLoadThreshold) Loading.slowThreshold
+        , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
     )
 
@@ -122,7 +122,7 @@ view model =
                             , div [ class "article-meta" ] <|
                                 List.append
                                     [ a [ Route.href (Route.Profile (Author.username author)) ]
-                                        [ img [ Avatar.src (Profile.avatar profile) ] [] ]
+                                        [ img [ Data.Avatar.src (Profile.avatar profile) ] [] ]
                                     , div [ class "info" ]
                                         [ Author.view (Author.username author)
                                         , Timestamp.view model.timeZone (Article.metadata article).createdAt
@@ -142,7 +142,7 @@ view model =
                             [ div [ class "article-meta" ] <|
                                 List.append
                                     [ a [ Route.href (Route.Profile (Author.username author)) ]
-                                        [ img [ Avatar.src avatar ] [] ]
+                                        [ img [ Data.Avatar.src avatar ] [] ]
                                     , div [ class "info" ]
                                         [ Author.view (Author.username author)
                                         , Timestamp.view model.timeZone (Article.metadata article).createdAt
@@ -158,7 +158,7 @@ view model =
                                         []
 
                                     LoadingSlowly ->
-                                        [ Loading.icon ]
+                                        [ View.Loading.icon ]
 
                                     Loaded ( commentText, comments ) ->
                                         -- Don't let users add comments until they can
@@ -169,7 +169,7 @@ view model =
                                             :: List.map (viewComment model.timeZone slug) comments
 
                                     Failed ->
-                                        [ Loading.error "comments" ]
+                                        [ View.Loading.error "comments" ]
                             ]
                         ]
                     ]
@@ -179,10 +179,10 @@ view model =
             { title = "Article", content = text "" }
 
         LoadingSlowly ->
-            { title = "Article", content = Loading.icon }
+            { title = "Article", content = View.Loading.icon }
 
         Failed ->
-            { title = "Article", content = Loading.error "article" }
+            { title = "Article", content = View.Loading.error "article" }
 
 
 viewAddComment : Slug -> CommentText -> Maybe Viewer -> Html Msg
@@ -216,7 +216,7 @@ viewAddComment slug commentText maybeViewer =
                         []
                     ]
                 , div [ class "card-footer" ]
-                    [ img [ class "comment-author-img", Avatar.src avatar ] []
+                    [ img [ class "comment-author-img", Data.Avatar.src avatar ] []
                     , button
                         (class "btn btn-sm btn-primary" :: buttonAttrs)
                         [ text "Post Comment" ]
@@ -291,7 +291,7 @@ viewComment timeZone slug comment =
             [ p [ class "card-text" ] [ text (Comment.body comment) ] ]
         , div [ class "card-footer" ]
             [ a [ class "comment-author", href "" ]
-                [ img [ class "comment-author-img", Avatar.src (Profile.avatar profile) ] []
+                [ img [ class "comment-author-img", Data.Avatar.src (Profile.avatar profile) ] []
                 , text " "
                 ]
             , text " "
@@ -346,21 +346,21 @@ update msg model =
 
         CompletedLoadArticle (Err error) ->
             ( { model | article = Failed }
-            , Log.error
+            , Data.Log.error
             )
 
         CompletedLoadComments (Ok comments) ->
             ( { model | comments = Loaded ( Editing "", comments ) }, Cmd.none )
 
         CompletedLoadComments (Err error) ->
-            ( { model | article = Failed }, Log.error )
+            ( { model | article = Failed }, Data.Log.error )
 
         CompletedFavoriteChange (Ok newArticle) ->
             ( { model | article = Loaded newArticle }, Cmd.none )
 
         CompletedFavoriteChange (Err error) ->
-            ( { model | errors = Api.addServerError model.errors }
-            , Log.error
+            ( { model | errors = Data.Api.addServerError model.errors }
+            , Data.Log.error
             )
 
         ClickedUnfollow cred followedAuthor ->
@@ -381,11 +381,11 @@ update msg model =
                     ( { model | article = Loaded (Article.mapAuthor (\_ -> newAuthor) article) }, Cmd.none )
 
                 _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         CompletedFollowChange (Err error) ->
-            ( { model | errors = Api.addServerError model.errors }
-            , Log.error
+            ( { model | errors = Data.Api.addServerError model.errors }
+            , Data.Log.error
             )
 
         EnteredCommentText str ->
@@ -399,13 +399,13 @@ update msg model =
                     )
 
                 _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         ClickedPostComment cred slug ->
             case model.comments of
                 Loaded ( Editing "", comments ) ->
                     -- No posting empty comments!
-                    -- We don't use Log.error here because this isn't an error,
+                    -- We don't use Data.Log.error here because this isn't an error,
                     -- it just doesn't do anything.
                     ( model, Cmd.none )
 
@@ -420,7 +420,7 @@ update msg model =
                     -- Either we have no comment to post, or there's already
                     -- one in the process of being posted, or we don't have
                     -- a valid article, in which case how did we post this?
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         CompletedPostComment (Ok comment) ->
             case model.comments of
@@ -430,11 +430,11 @@ update msg model =
                     )
 
                 _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         CompletedPostComment (Err error) ->
-            ( { model | errors = Api.addServerError model.errors }
-            , Log.error
+            ( { model | errors = Data.Api.addServerError model.errors }
+            , Data.Log.error
             )
 
         ClickedDeleteComment cred slug id ->
@@ -452,11 +452,11 @@ update msg model =
                     )
 
                 _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         CompletedDeleteComment id (Err error) ->
-            ( { model | errors = Api.addServerError model.errors }
-            , Log.error
+            ( { model | errors = Data.Api.addServerError model.errors }
+            , Data.Log.error
             )
 
         ClickedDeleteArticle cred slug ->
@@ -469,8 +469,8 @@ update msg model =
             ( model, Route.replaceUrl (Session.navKey model.session) Route.Home )
 
         CompletedDeleteArticle (Err error) ->
-            ( { model | errors = Api.addServerError model.errors }
-            , Log.error
+            ( { model | errors = Data.Api.addServerError model.errors }
+            , Data.Log.error
             )
 
         GotTimeZone tz ->
@@ -519,7 +519,7 @@ subscriptions model =
 
 delete : Slug -> Cred -> Http.Request ()
 delete slug cred =
-    Api.delete (Endpoint.article slug) cred Http.emptyBody (Decode.succeed ())
+    Data.Api.delete (Endpoint.article slug) cred Http.emptyBody (Decode.succeed ())
 
 
 

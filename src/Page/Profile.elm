@@ -3,17 +3,17 @@ module Page.Profile exposing (Model, Msg, init, subscriptions, toSession, update
 {-| An Author's profile.
 -}
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
-import Article exposing (Article, Preview)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Article as Article exposing (Article, Preview)
 import Article.Feed as Feed
-import Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor)
-import Avatar exposing (Avatar)
+import Data.Author as Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor)
+import Data.Avatar exposing (Avatar)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
-import Loading
-import Log
+import View.Loading
+import Data.Log
 import Page
 import PaginatedList exposing (PaginatedList)
 import Profile exposing (Profile)
@@ -76,7 +76,7 @@ init session username =
             |> Task.attempt CompletedAuthorLoad
         , fetchFeed session defaultFeedTab username 1
         , Task.perform GotTimeZone Time.here
-        , Task.perform (\_ -> PassedSlowLoadThreshold) Loading.slowThreshold
+        , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
     )
 
@@ -126,7 +126,7 @@ fetchFeed session feedTabs username page =
         expect =
             Feed.decoder maybeCred articlesPerPage
     in
-    Api.get (Endpoint.articles params) maybeCred expect
+    Data.Api.get (Endpoint.articles params) maybeCred expect
         |> Http.toTask
         |> Task.map (Feed.init session)
         |> Task.mapError (Tuple.pair username)
@@ -200,7 +200,7 @@ view model =
                         [ div [ class "container" ]
                             [ div [ class "row" ]
                                 [ div [ class "col-xs-12 col-md-10 offset-md-1" ]
-                                    [ img [ class "user-img", Avatar.src (Profile.avatar profile) ] []
+                                    [ img [ class "user-img", Data.Avatar.src (Profile.avatar profile) ] []
                                     , h4 [] [ Username.toHtml username ]
                                     , p [] [ text (Maybe.withDefault "" (Profile.bio profile)) ]
                                     , followButton
@@ -228,20 +228,20 @@ view model =
                             text ""
 
                         LoadingSlowly _ ->
-                            Loading.icon
+                            View.Loading.icon
 
                         Failed _ ->
-                            Loading.error "feed"
+                            View.Loading.error "feed"
                     ]
 
             Loading _ ->
                 text ""
 
             LoadingSlowly _ ->
-                Loading.icon
+                View.Loading.icon
 
             Failed _ ->
-                Loading.error "profile"
+                View.Loading.error "profile"
     }
 
 
@@ -258,7 +258,7 @@ titleForMe : Maybe Cred -> Username -> String
 titleForMe maybeCred username =
     case maybeCred of
         Just cred ->
-            if username == Api.username cred then
+            if username == Data.Api.username cred then
                 myProfileTitle
 
             else
@@ -356,7 +356,7 @@ update msg model =
 
         CompletedFollowChange (Err error) ->
             ( model
-            , Log.error
+            , Data.Log.error
             )
 
         CompletedAuthorLoad (Ok author) ->
@@ -364,7 +364,7 @@ update msg model =
 
         CompletedAuthorLoad (Err ( username, err )) ->
             ( { model | author = Failed username }
-            , Log.error
+            , Data.Log.error
             )
 
         CompletedFeedLoad (Ok feed) ->
@@ -374,7 +374,7 @@ update msg model =
 
         CompletedFeedLoad (Err ( username, err )) ->
             ( { model | feed = Failed username }
-            , Log.error
+            , Data.Log.error
             )
 
         GotFeedMsg subMsg ->
@@ -389,13 +389,13 @@ update msg model =
                     )
 
                 Loading _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
                 LoadingSlowly _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
                 Failed _ ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         GotTimeZone tz ->
             ( { model | timeZone = tz }, Cmd.none )

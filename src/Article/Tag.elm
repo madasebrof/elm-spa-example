@@ -1,7 +1,7 @@
 module Article.Tag exposing (Tag, list, toString)
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
 import Http
 import Json.Decode as Decode exposing (Decoder)
 
@@ -30,7 +30,7 @@ toString (Tag slug) =
 list : Http.Request (List Tag)
 list =
     Decode.field "tags" (Decode.list decoder)
-        |> Api.get Endpoint.tags Nothing
+        |> Data.Api.get Endpoint.tags Nothing
 
 
 

@@ -3,9 +3,9 @@ module Page.Home exposing (Model, Msg, init, subscriptions, toSession, update, v
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
-import Article exposing (Article, Preview)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Article as Article exposing (Article, Preview)
 import Article.Feed as Feed
 import Article.Tag as Tag exposing (Tag)
 import Browser.Dom as Dom
@@ -13,8 +13,8 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
 import Http
-import Loading
-import Log
+import View.Loading
+import Data.Log
 import Page
 import PaginatedList exposing (PaginatedList)
 import Session exposing (Session)
@@ -80,7 +80,7 @@ init session =
         , Tag.list
             |> Http.send CompletedTagsLoad
         , Task.perform GotTimeZone Time.here
-        , Task.perform (\_ -> PassedSlowLoadThreshold) Loading.slowThreshold
+        , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
     )
 
@@ -116,10 +116,10 @@ view model =
                                 []
 
                             LoadingSlowly ->
-                                [ Loading.icon ]
+                                [ View.Loading.icon ]
 
                             Failed ->
-                                [ Loading.error "feed" ]
+                                [ View.Loading.error "feed" ]
                     , div [ class "col-md-3" ] <|
                         case model.tags of
                             Loaded tags ->
@@ -133,10 +133,10 @@ view model =
                                 []
 
                             LoadingSlowly ->
-                                [ Loading.icon ]
+                                [ View.Loading.icon ]
 
                             Failed ->
-                                [ Loading.error "tags" ]
+                                [ View.Loading.error "tags" ]
                     ]
                 ]
             ]
@@ -277,7 +277,7 @@ update msg model =
 
         CompletedTagsLoad (Err error) ->
             ( { model | tags = Failed }
-            , Log.error
+            , Data.Log.error
             )
 
         GotFeedMsg subMsg ->
@@ -292,13 +292,13 @@ update msg model =
                     )
 
                 Loading ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
                 LoadingSlowly ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
                 Failed ->
-                    ( model, Log.error )
+                    ( model, Data.Log.error )
 
         GotTimeZone tz ->
             ( { model | timeZone = tz }, Cmd.none )
@@ -348,17 +348,17 @@ fetchFeed session feedTabs page =
         request =
             case feedTabs of
                 YourFeed cred ->
-                    Api.get (Endpoint.feed params) maybeCred decoder
+                    Data.Api.get (Endpoint.feed params) maybeCred decoder
 
                 GlobalFeed ->
-                    Api.get (Endpoint.articles params) maybeCred decoder
+                    Data.Api.get (Endpoint.articles params) maybeCred decoder
 
                 TagFeed tag ->
                     let
                         firstParam =
                             Url.Builder.string "tag" (Tag.toString tag)
                     in
-                    Api.get (Endpoint.articles (firstParam :: params)) maybeCred decoder
+                    Data.Api.get (Endpoint.articles (firstParam :: params)) maybeCred decoder
     in
     Http.toTask request
         |> Task.map (Feed.init session)

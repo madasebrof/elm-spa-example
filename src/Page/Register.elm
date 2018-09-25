@@ -1,6 +1,6 @@
 module Page.Register exposing (Model, Msg, init, subscriptions, toSession, update, view)
 
-import Api exposing (Cred)
+import Data.Api exposing (Cred)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -168,7 +168,7 @@ update msg model =
         CompletedRegister (Err error) ->
             let
                 serverErrors =
-                    Api.decodeErrors error
+                    Data.Api.decodeErrors error
                         |> List.map ServerError
             in
             ( { model | problems = List.append model.problems serverErrors }
@@ -314,4 +314,4 @@ register (Trimmed form) =
             Encode.object [ ( "user", user ) ]
                 |> Http.jsonBody
     in
-    Api.register body Viewer.decoder
+    Data.Api.register body Viewer.decoder

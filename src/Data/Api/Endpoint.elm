@@ -1,7 +1,7 @@
-module Api.Endpoint exposing (Endpoint, article, articles, comment, comments, favorite, feed, follow, login, profiles, request, tags, user, users)
+module Data.Api.Endpoint exposing (Endpoint, article, articles, comment, comments, favorite, feed, follow, login, profiles, request, tags, user, users)
 
 import Article.Slug as Slug exposing (Slug)
-import CommentId exposing (CommentId)
+import Data.CommentId exposing (CommentId)
 import Http
 import Url.Builder exposing (QueryParameter)
 import Username exposing (Username)
@@ -99,7 +99,7 @@ comments slug =
 
 comment : Slug -> CommentId -> Endpoint
 comment slug commentId =
-    url [ "articles", Slug.toString slug, "comments", CommentId.toString commentId ] []
+    url [ "articles", Slug.toString slug, "comments", Data.CommentId.toString commentId ] []
 
 
 favorite : Slug -> Endpoint

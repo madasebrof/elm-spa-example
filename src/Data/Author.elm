@@ -1,4 +1,4 @@
-module Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor, decoder, fetch, follow, followButton, profile, requestFollow, requestUnfollow, unfollow, unfollowButton, username, view)
+module Data.Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor, decoder, fetch, follow, followButton, profile, requestFollow, requestUnfollow, unfollow, unfollowButton, username, view)
 
 {-| The author of an Article. It includes a Profile.
 
@@ -31,8 +31,8 @@ There are still ways we could mess things up (e.g. make a button that calls Auth
 
 -}
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
 import Html exposing (Html, a, i, text)
 import Html.Attributes exposing (attribute, class, href, id, placeholder)
 import Html.Events exposing (onClick)
@@ -78,7 +78,7 @@ username : Author -> Username
 username author =
     case author of
         IsViewer cred _ ->
-            Api.username cred
+            Data.Api.username cred
 
         IsFollowing (FollowedAuthor val _) ->
             val
@@ -109,7 +109,7 @@ profile author =
 fetch : Username -> Maybe Cred -> Http.Request Author
 fetch uname maybeCred =
     Decode.field "profile" (decoder maybeCred)
-        |> Api.get (Endpoint.profiles uname) maybeCred
+        |> Data.Api.get (Endpoint.profiles uname) maybeCred
 
 
 
@@ -128,12 +128,12 @@ unfollow (FollowedAuthor uname prof) =
 
 requestFollow : UnfollowedAuthor -> Cred -> Http.Request Author
 requestFollow (UnfollowedAuthor uname _) cred =
-    Api.post (Endpoint.follow uname) (Just cred) Http.emptyBody (followDecoder cred)
+    Data.Api.post (Endpoint.follow uname) (Just cred) Http.emptyBody (followDecoder cred)
 
 
 requestUnfollow : FollowedAuthor -> Cred -> Http.Request Author
 requestUnfollow (FollowedAuthor uname _) cred =
-    Api.delete (Endpoint.follow uname)
+    Data.Api.delete (Endpoint.follow uname)
         cred
         Http.emptyBody
         (followDecoder cred)
@@ -203,7 +203,7 @@ decodeFromPair maybeCred ( prof, uname ) =
             Decode.succeed (IsNotFollowing (UnfollowedAuthor uname prof))
 
         Just cred ->
-            if uname == Api.username cred then
+            if uname == Data.Api.username cred then
                 Decode.succeed (IsViewer cred prof)
 
             else

@@ -1,4 +1,4 @@
-module Email exposing (Email, decoder, encode, toString)
+module Data.Email exposing (Email, decoder, encode, toString)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)

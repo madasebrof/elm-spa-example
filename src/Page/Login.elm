@@ -3,7 +3,7 @@ module Page.Login exposing (Model, Msg, init, subscriptions, toSession, update, 
 {-| The login page.
 -}
 
-import Api exposing (Cred)
+import Data.Api exposing (Cred)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -180,7 +180,7 @@ update msg model =
         CompletedLogin (Err error) ->
             let
                 serverErrors =
-                    Api.decodeErrors error
+                    Data.Api.decodeErrors error
                         |> List.map ServerError
             in
             ( { model | problems = List.append model.problems serverErrors }
@@ -303,7 +303,7 @@ login (Trimmed form) =
             Encode.object [ ( "user", user ) ]
                 |> Http.jsonBody
     in
-    Api.login body Viewer.decoder
+    Data.Api.login body Viewer.decoder
 
 
 

@@ -1,11 +1,11 @@
 module Article.Feed exposing (Model, Msg, decoder, init, update, viewArticles, viewPagination, viewTabs)
 
-import Api exposing (Cred)
-import Article exposing (Article, Preview)
 import Article.Slug as ArticleSlug exposing (Slug)
 import Article.Tag as Tag exposing (Tag)
-import Author
-import Avatar exposing (Avatar)
+import Data.Api exposing (Cred)
+import Data.Article exposing (Article, Preview)
+import Data.Author
+import Data.Avatar exposing (Avatar)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Html.Events exposing (onClick)
@@ -92,33 +92,33 @@ viewPreview : Maybe Cred -> Time.Zone -> Article Preview -> Html Msg
 viewPreview maybeCred timeZone article =
     let
         slug =
-            Article.slug article
+            Data.Article.slug article
 
         { title, description, createdAt } =
-            Article.metadata article
+            Data.Article.metadata article
 
         author =
-            Article.author article
+            Data.Article.author article
 
         profile =
-            Author.profile author
+            Data.Author.profile author
 
         username =
-            Author.username author
+            Data.Author.username author
 
         faveButton =
             case maybeCred of
                 Just cred ->
                     let
                         { favoritesCount, favorited } =
-                            Article.metadata article
+                            Data.Article.metadata article
 
                         viewButton =
                             if favorited then
-                                Article.unfavoriteButton cred (ClickedUnfavorite cred slug)
+                                Data.Article.unfavoriteButton cred (ClickedUnfavorite cred slug)
 
                             else
-                                Article.favoriteButton cred (ClickedFavorite cred slug)
+                                Data.Article.favoriteButton cred (ClickedFavorite cred slug)
                     in
                     viewButton [ class "pull-xs-right" ]
                         [ text (" " ++ String.fromInt favoritesCount) ]
@@ -129,19 +129,19 @@ viewPreview maybeCred timeZone article =
     div [ class "article-preview" ]
         [ div [ class "article-meta" ]
             [ a [ Route.href (Route.Profile username) ]
-                [ img [ Avatar.src (Profile.avatar profile) ] [] ]
+                [ img [ Data.Avatar.src (Profile.avatar profile) ] [] ]
             , div [ class "info" ]
-                [ Author.view username
+                [ Data.Author.view username
                 , Timestamp.view timeZone createdAt
                 ]
             , faveButton
             ]
-        , a [ class "preview-link", Route.href (Route.Article (Article.slug article)) ]
+        , a [ class "preview-link", Route.href (Route.Article (Data.Article.slug article)) ]
             [ h1 [] [ text title ]
             , p [] [ text description ]
             , span [] [ text "Read more..." ]
             , ul [ class "tag-list" ]
-                (List.map viewTag (Article.metadata article).tags)
+                (List.map viewTag (Data.Article.metadata article).tags)
             ]
         ]
 
@@ -224,10 +224,10 @@ update maybeCred msg (Model model) =
             ( Model { model | errors = [] }, Cmd.none )
 
         ClickedFavorite cred slug ->
-            fave Article.favorite cred slug model
+            fave Data.Article.favorite cred slug model
 
         ClickedUnfavorite cred slug ->
-            fave Article.unfavorite cred slug model
+            fave Data.Article.unfavorite cred slug model
 
         CompletedFavorite (Ok article) ->
             ( Model { model | articles = PaginatedList.map (replaceArticle article) model.articles }
@@ -235,14 +235,14 @@ update maybeCred msg (Model model) =
             )
 
         CompletedFavorite (Err error) ->
-            ( Model { model | errors = Api.addServerError model.errors }
+            ( Model { model | errors = Data.Api.addServerError model.errors }
             , Cmd.none
             )
 
 
 replaceArticle : Article a -> Article a -> Article a
 replaceArticle newArticle oldArticle =
-    if Article.slug newArticle == Article.slug oldArticle then
+    if Data.Article.slug newArticle == Data.Article.slug oldArticle then
         newArticle
 
     else
@@ -257,7 +257,7 @@ decoder : Maybe Cred -> Int -> Decoder (PaginatedList (Article Preview))
 decoder maybeCred resultsPerPage =
     Decode.succeed PaginatedList.fromList
         |> required "articlesCount" (pageCountDecoder resultsPerPage)
-        |> required "articles" (Decode.list (Article.previewDecoder maybeCred))
+        |> required "articles" (Decode.list (Data.Article.previewDecoder maybeCred))
 
 
 pageCountDecoder : Int -> Decoder Int

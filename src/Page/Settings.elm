@@ -1,10 +1,10 @@
 module Page.Settings exposing (Model, Msg, init, subscriptions, toSession, update, view)
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
-import Avatar
 import Browser.Navigation as Nav
-import Email exposing (Email)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Avatar
+import Data.Email exposing (Email)
 import Html exposing (Html, button, div, fieldset, h1, input, li, text, textarea, ul)
 import Html.Attributes exposing (attribute, class, placeholder, type_, value)
 import Html.Events exposing (onInput, onSubmit)
@@ -12,13 +12,13 @@ import Http
 import Json.Decode as Decode exposing (Decoder, decodeString, field, list, string)
 import Json.Decode.Pipeline exposing (hardcoded, required)
 import Json.Encode as Encode
-import Loading
-import Log
+import Data.Log
 import Profile exposing (Profile)
 import Route
 import Session exposing (Session)
 import Task
 import Username as Username exposing (Username)
+import View.Loading
 import Viewer exposing (Viewer)
 
 
@@ -61,9 +61,9 @@ init session =
       , status = Loading
       }
     , Cmd.batch
-        [ Api.get Endpoint.user (Session.cred session) (Decode.field "user" formDecoder)
+        [ Data.Api.get Endpoint.user (Session.cred session) (Decode.field "user" formDecoder)
             |> Http.send CompletedFormLoad
-        , Task.perform (\_ -> PassedSlowLoadThreshold) Loading.slowThreshold
+        , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
     )
 
@@ -115,7 +115,7 @@ view model =
                                         text ""
 
                                     LoadingSlowly ->
-                                        Loading.icon
+                                        View.Loading.icon
 
                                     Failed ->
                                         text "Error loading page."
@@ -262,7 +262,7 @@ update msg model =
         CompletedSave (Err error) ->
             let
                 serverErrors =
-                    Api.decodeErrors error
+                    Data.Api.decodeErrors error
                         |> List.map ServerError
             in
             ( { model | problems = List.append model.problems serverErrors }
@@ -300,7 +300,7 @@ updateForm transform model =
             ( { model | status = Loaded (transform form) }, Cmd.none )
 
         _ ->
-            ( model, Log.error )
+            ( model, Data.Log.error )
 
 
 
@@ -449,7 +449,7 @@ edit cred (Trimmed form) =
             Encode.object [ ( "user", encodedUser ) ]
                 |> Http.jsonBody
     in
-    Api.settings cred body Viewer.decoder
+    Data.Api.settings cred body Viewer.decoder
 
 
 nothingIfEmpty : String -> Maybe String

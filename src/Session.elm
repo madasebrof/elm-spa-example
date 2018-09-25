@@ -1,7 +1,7 @@
 module Session exposing (Session, changes, cred, fromViewer, navKey, viewer)
 
-import Api exposing (Cred)
-import Avatar exposing (Avatar)
+import Data.Api exposing (Cred)
+import Data.Avatar exposing (Avatar)
 import Browser.Navigation as Nav
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, required)
@@ -60,7 +60,7 @@ navKey session =
 
 changes : (Session -> msg) -> Nav.Key -> Sub msg
 changes toMsg key =
-    Api.viewerChanges (\maybeViewer -> toMsg (fromViewer key maybeViewer)) Viewer.decoder
+    Data.Api.viewerChanges (\maybeViewer -> toMsg (fromViewer key maybeViewer)) Viewer.decoder
 
 
 fromViewer : Nav.Key -> Maybe Viewer -> Session

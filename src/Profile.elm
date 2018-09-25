@@ -6,8 +6,8 @@ Contrast with Cred, which is the currently signed-in user.
 
 -}
 
-import Api exposing (Cred)
-import Avatar exposing (Avatar)
+import Data.Api exposing (Cred)
+import Data.Avatar exposing (Avatar)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (required)
@@ -50,5 +50,5 @@ decoder : Decoder Profile
 decoder =
     Decode.succeed Internals
         |> required "bio" (Decode.nullable Decode.string)
-        |> required "image" Avatar.decoder
+        |> required "image" Data.Avatar.decoder
         |> Decode.map Profile

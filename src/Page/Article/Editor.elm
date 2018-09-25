@@ -1,8 +1,8 @@
 module Page.Article.Editor exposing (Model, Msg, initEdit, initNew, subscriptions, toSession, update, view)
 
-import Api exposing (Cred)
-import Api.Endpoint as Endpoint
-import Article exposing (Article, Full)
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Article as Article exposing (Article, Full)
 import Article.Body exposing (Body)
 import Article.Slug as Slug exposing (Slug)
 import Browser.Navigation as Nav
@@ -12,7 +12,7 @@ import Html.Events exposing (onInput, onSubmit)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Loading
+import View.Loading
 import Page
 import Profile exposing (Profile)
 import Route
@@ -84,7 +84,7 @@ initEdit session slug =
             -- at least have it later to display the page's title properly!
             |> Task.mapError (\httpError -> ( slug, httpError ))
             |> Task.attempt CompletedArticleLoad
-        , Task.perform (\_ -> PassedSlowLoadThreshold) Loading.slowThreshold
+        , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
     )
 
@@ -141,7 +141,7 @@ viewAuthenticated cred model =
                     []
 
                 LoadingSlowly _ ->
-                    [ Loading.icon ]
+                    [ View.Loading.icon ]
 
                 Saving slug form ->
                     [ viewForm cred form (editArticleSaveButton [ disabled True ]) ]
@@ -532,7 +532,7 @@ create (Trimmed form) cred =
                 |> Http.jsonBody
     in
     Decode.field "article" (Article.fullDecoder (Just cred))
-        |> Api.post (Endpoint.articles []) (Just cred) body
+        |> Data.Api.post (Endpoint.articles []) (Just cred) body
 
 
 tagsFromString : String -> List String
@@ -557,7 +557,7 @@ edit articleSlug (Trimmed form) cred =
                 |> Http.jsonBody
     in
     Decode.field "article" (Article.fullDecoder (Just cred))
-        |> Api.put (Endpoint.article articleSlug) cred body
+        |> Data.Api.put (Endpoint.article articleSlug) cred body
 
 
 

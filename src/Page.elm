@@ -1,8 +1,8 @@
 module Page exposing (Page(..), view, viewErrors)
 
-import Api exposing (Cred)
-import Avatar
 import Browser exposing (Document)
+import Data.Api exposing (Cred)
+import Data.Avatar
 import Html exposing (Html, a, button, div, footer, i, img, li, nav, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, style)
 import Html.Events exposing (onClick)
@@ -78,7 +78,7 @@ viewMenu page maybeViewer =
             , linkTo Route.Settings [ i [ class "ion-gear-a" ] [], text "\u{00A0}Settings" ]
             , linkTo
                 (Route.Profile username)
-                [ img [ class "user-pic", Avatar.src avatar ] []
+                [ img [ class "user-pic", Data.Avatar.src avatar ] []
                 , Username.toHtml username
                 ]
             , linkTo Route.Logout [ text "Sign out" ]
