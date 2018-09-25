@@ -6,22 +6,22 @@ import Data.Api exposing (Cred)
 import Data.Article exposing (Article, Preview)
 import Data.Author
 import Data.Avatar exposing (Avatar)
+import Data.PaginatedList exposing (PaginatedList)
+import Data.Profile
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (required)
-import Page
-import PaginatedList exposing (PaginatedList)
-import Profile
-import Route exposing (Route)
-import Session exposing (Session)
 import Task exposing (Task)
 import Time
-import Timestamp
 import Url exposing (Url)
-import Username exposing (Username)
+import Data.Username exposing (Username)
+import View.Page
+import View.Timestamp
 
 
 {-| NOTE: This module has its own Model, view, and update. This is not normal!
@@ -79,13 +79,13 @@ viewArticles : Time.Zone -> Model -> List (Html Msg)
 viewArticles timeZone (Model { articles, session, errors }) =
     let
         maybeCred =
-            Session.cred session
+            Data.Session.cred session
 
         articlesHtml =
-            PaginatedList.values articles
+            Data.PaginatedList.values articles
                 |> List.map (viewPreview maybeCred timeZone)
     in
-    Page.viewErrors ClickedDismissErrors errors :: articlesHtml
+    View.Page.viewErrors ClickedDismissErrors errors :: articlesHtml
 
 
 viewPreview : Maybe Cred -> Time.Zone -> Article Preview -> Html Msg
@@ -128,15 +128,15 @@ viewPreview maybeCred timeZone article =
     in
     div [ class "article-preview" ]
         [ div [ class "article-meta" ]
-            [ a [ Route.href (Route.Profile username) ]
-                [ img [ Data.Avatar.src (Profile.avatar profile) ] [] ]
+            [ a [ Data.Route.href (Data.Route.Profile username) ]
+                [ img [ Data.Avatar.src (Data.Profile.avatar profile) ] [] ]
             , div [ class "info" ]
                 [ Data.Author.view username
-                , Timestamp.view timeZone createdAt
+                , View.Timestamp.view timeZone createdAt
                 ]
             , faveButton
             ]
-        , a [ class "preview-link", Route.href (Route.Article (Data.Article.slug article)) ]
+        , a [ class "preview-link", Data.Route.href (Data.Route.Article (Data.Article.slug article)) ]
             [ h1 [] [ text title ]
             , p [] [ text description ]
             , span [] [ text "Read more..." ]
@@ -176,7 +176,7 @@ viewPagination toMsg page (Model feed) =
             pageLink toMsg currentPage (currentPage == page)
 
         totalPages =
-            PaginatedList.total feed.articles
+            Data.PaginatedList.total feed.articles
     in
     if totalPages > 1 then
         List.range 1 totalPages
@@ -230,7 +230,7 @@ update maybeCred msg (Model model) =
             fave Data.Article.unfavorite cred slug model
 
         CompletedFavorite (Ok article) ->
-            ( Model { model | articles = PaginatedList.map (replaceArticle article) model.articles }
+            ( Model { model | articles = Data.PaginatedList.map (replaceArticle article) model.articles }
             , Cmd.none
             )
 
@@ -255,7 +255,7 @@ replaceArticle newArticle oldArticle =
 
 decoder : Maybe Cred -> Int -> Decoder (PaginatedList (Article Preview))
 decoder maybeCred resultsPerPage =
-    Decode.succeed PaginatedList.fromList
+    Decode.succeed Data.PaginatedList.fromList
         |> required "articlesCount" (pageCountDecoder resultsPerPage)
         |> required "articles" (Decode.list (Data.Article.previewDecoder maybeCred))
 

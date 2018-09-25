@@ -1,6 +1,8 @@
 module B_Message exposing (Msg(..))
 
 import Browser
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
 import Page.Article as Article
 import Page.Article.Editor as Editor
 import Page.Home as Home
@@ -8,8 +10,6 @@ import Page.Login as Login
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Route exposing (Route)
-import Session exposing (Session)
 import Url exposing (Url)
 
 

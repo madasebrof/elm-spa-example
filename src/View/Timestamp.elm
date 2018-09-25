@@ -1,4 +1,4 @@
-module Timestamp exposing (format, view)
+module View.Timestamp exposing (format, view)
 
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)

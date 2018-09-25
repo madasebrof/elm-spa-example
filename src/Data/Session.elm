@@ -1,14 +1,14 @@
-module Session exposing (Session, changes, cred, fromViewer, navKey, viewer)
+module Data.Session exposing (Session, changes, cred, fromViewer, navKey, viewer)
 
+import Browser.Navigation as Nav
 import Data.Api exposing (Cred)
 import Data.Avatar exposing (Avatar)
-import Browser.Navigation as Nav
+import Data.Profile exposing (Profile)
+import Data.Viewer exposing (Viewer)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, required)
 import Json.Encode as Encode exposing (Value)
-import Profile exposing (Profile)
 import Time
-import Viewer exposing (Viewer)
 
 
 
@@ -38,7 +38,7 @@ cred : Session -> Maybe Cred
 cred session =
     case session of
         LoggedIn _ val ->
-            Just (Viewer.cred val)
+            Just (Data.Viewer.cred val)
 
         Guest _ ->
             Nothing
@@ -60,7 +60,7 @@ navKey session =
 
 changes : (Session -> msg) -> Nav.Key -> Sub msg
 changes toMsg key =
-    Data.Api.viewerChanges (\maybeViewer -> toMsg (fromViewer key maybeViewer)) Viewer.decoder
+    Data.Api.viewerChanges (\maybeViewer -> toMsg (fromViewer key maybeViewer)) Data.Viewer.decoder
 
 
 fromViewer : Nav.Key -> Maybe Viewer -> Session

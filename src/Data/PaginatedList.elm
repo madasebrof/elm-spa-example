@@ -1,4 +1,4 @@
-module PaginatedList exposing (PaginatedList, fromList, map, params, total, values)
+module Data.PaginatedList exposing (PaginatedList, fromList, map, params, total, values)
 
 import Html exposing (Html, a, li, text, ul)
 import Html.Attributes exposing (class, classList, href)

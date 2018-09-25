@@ -10,12 +10,12 @@ import Browser
 import Browser.Navigation as Nav
 import Data.Api.Endpoint as Endpoint exposing (Endpoint)
 import Data.Avatar exposing (Avatar)
+import Data.Username exposing (Username)
 import Http exposing (Body, Expect)
 import Json.Decode as Decode exposing (Decoder, Value, decodeString, field, string)
 import Json.Decode.Pipeline as Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Url exposing (Url)
-import Username exposing (Username)
 
 
 
@@ -61,7 +61,7 @@ or was passed in via flags.
 credDecoder : Decoder Cred
 credDecoder =
     Decode.succeed Cred
-        |> required "username" Username.decoder
+        |> required "username" Data.Username.decoder
         |> required "token" Decode.string
 
 
@@ -102,7 +102,7 @@ storeCredWith (Cred uname token) avatar =
             Encode.object
                 [ ( "user"
                   , Encode.object
-                        [ ( "username", Username.encode uname )
+                        [ ( "username", Data.Username.encode uname )
                         , ( "token", Encode.string token )
                         , ( "image", Data.Avatar.encode avatar )
                         ]

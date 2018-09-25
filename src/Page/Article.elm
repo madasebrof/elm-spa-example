@@ -13,22 +13,22 @@ import Data.Article as Article exposing (Article, Full, Preview)
 import Data.Author as Author exposing (Author(..), FollowedAuthor, UnfollowedAuthor)
 import Data.Avatar
 import Data.CommentId exposing (CommentId)
+import Data.Log
+import Data.Profile exposing (Profile)
+import Data.Route
+import Data.Session exposing (Session)
+import Data.Viewer exposing (Viewer)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Json.Decode as Decode
-import Data.Log
-import Page
-import Profile exposing (Profile)
-import Route
-import Session exposing (Session)
 import Task exposing (Task)
 import Time
-import Timestamp
-import Username exposing (Username)
+import Data.Username exposing (Username)
 import View.Loading
-import Viewer exposing (Viewer)
+import View.Page
+import View.Timestamp
 
 
 
@@ -62,7 +62,7 @@ init : Session -> Slug -> ( Model, Cmd Msg )
 init session slug =
     let
         maybeCred =
-            Session.cred session
+            Data.Session.cred session
     in
     ( { session = session
       , timeZone = Time.utc
@@ -97,7 +97,7 @@ view model =
                     Article.author article
 
                 avatar =
-                    Profile.avatar (Author.profile author)
+                    Data.Profile.avatar (Author.profile author)
 
                 slug =
                     Article.slug article
@@ -106,7 +106,7 @@ view model =
                     Author.profile author
 
                 buttons =
-                    case Session.cred model.session of
+                    case Data.Session.cred model.session of
                         Just cred ->
                             viewButtons cred article author
 
@@ -121,15 +121,15 @@ view model =
                             [ h1 [] [ text title ]
                             , div [ class "article-meta" ] <|
                                 List.append
-                                    [ a [ Route.href (Route.Profile (Author.username author)) ]
-                                        [ img [ Data.Avatar.src (Profile.avatar profile) ] [] ]
+                                    [ a [ Data.Route.href (Data.Route.Profile (Author.username author)) ]
+                                        [ img [ Data.Avatar.src (Data.Profile.avatar profile) ] [] ]
                                     , div [ class "info" ]
                                         [ Author.view (Author.username author)
-                                        , Timestamp.view model.timeZone (Article.metadata article).createdAt
+                                        , View.Timestamp.view model.timeZone (Article.metadata article).createdAt
                                         ]
                                     ]
                                     buttons
-                            , Page.viewErrors ClickedDismissErrors model.errors
+                            , View.Page.viewErrors ClickedDismissErrors model.errors
                             ]
                         ]
                     , div [ class "container page" ]
@@ -141,11 +141,11 @@ view model =
                         , div [ class "article-actions" ]
                             [ div [ class "article-meta" ] <|
                                 List.append
-                                    [ a [ Route.href (Route.Profile (Author.username author)) ]
+                                    [ a [ Data.Route.href (Data.Route.Profile (Author.username author)) ]
                                         [ img [ Data.Avatar.src avatar ] [] ]
                                     , div [ class "info" ]
                                         [ Author.view (Author.username author)
-                                        , Timestamp.view model.timeZone (Article.metadata article).createdAt
+                                        , View.Timestamp.view model.timeZone (Article.metadata article).createdAt
                                         ]
                                     ]
                                     buttons
@@ -165,7 +165,7 @@ view model =
                                         -- see the existing comments! Otherwise you
                                         -- may be about to repeat something that's
                                         -- already been said.
-                                        viewAddComment slug commentText (Session.viewer model.session)
+                                        viewAddComment slug commentText (Data.Session.viewer model.session)
                                             :: List.map (viewComment model.timeZone slug) comments
 
                                     Failed ->
@@ -191,10 +191,10 @@ viewAddComment slug commentText maybeViewer =
         Just viewer ->
             let
                 avatar =
-                    Viewer.avatar viewer
+                    Data.Viewer.avatar viewer
 
                 cred =
-                    Viewer.cred viewer
+                    Data.Viewer.cred viewer
 
                 ( commentStr, buttonAttrs ) =
                     case commentText of
@@ -225,9 +225,9 @@ viewAddComment slug commentText maybeViewer =
 
         Nothing ->
             p []
-                [ a [ Route.href Route.Login ] [ text "Sign in" ]
+                [ a [ Data.Route.href Data.Route.Login ] [ text "Sign in" ]
                 , text " or "
-                , a [ Route.href Route.Register ] [ text "sign up" ]
+                , a [ Data.Route.href Data.Route.Register ] [ text "sign up" ]
                 , text " to comment."
                 ]
 
@@ -284,19 +284,19 @@ viewComment timeZone slug comment =
                     text ""
 
         timestamp =
-            Timestamp.format timeZone (Comment.createdAt comment)
+            View.Timestamp.format timeZone (Comment.createdAt comment)
     in
     div [ class "card" ]
         [ div [ class "card-block" ]
             [ p [ class "card-text" ] [ text (Comment.body comment) ] ]
         , div [ class "card-footer" ]
             [ a [ class "comment-author", href "" ]
-                [ img [ class "comment-author-img", Data.Avatar.src (Profile.avatar profile) ] []
+                [ img [ class "comment-author-img", Data.Avatar.src (Data.Profile.avatar profile) ] []
                 , text " "
                 ]
             , text " "
-            , a [ class "comment-author", Route.href (Route.Profile authorUsername) ]
-                [ text (Username.toString authorUsername) ]
+            , a [ class "comment-author", Data.Route.href (Data.Route.Profile authorUsername) ]
+                [ text (Data.Username.toString authorUsername) ]
             , span [ class "date-posted" ] [ text timestamp ]
             , deleteCommentButton
             ]
@@ -466,7 +466,7 @@ update msg model =
             )
 
         CompletedDeleteArticle (Ok ()) ->
-            ( model, Route.replaceUrl (Session.navKey model.session) Route.Home )
+            ( model, Data.Route.replaceUrl (Data.Session.navKey model.session) Data.Route.Home )
 
         CompletedDeleteArticle (Err error) ->
             ( { model | errors = Data.Api.addServerError model.errors }
@@ -478,7 +478,7 @@ update msg model =
 
         GotSession session ->
             ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
         PassedSlowLoadThreshold ->
@@ -510,7 +510,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 
@@ -582,5 +582,5 @@ deleteButton cred article =
 
 editButton : Article a -> Html Msg
 editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditArticle (Article.slug article)) ]
+    a [ class "btn btn-outline-secondary btn-sm", Data.Route.href (Data.Route.EditArticle (Article.slug article)) ]
         [ i [ class "ion-edit" ] [], text " Edit Article" ]

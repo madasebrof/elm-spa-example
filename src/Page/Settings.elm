@@ -13,13 +13,13 @@ import Json.Decode as Decode exposing (Decoder, decodeString, field, list, strin
 import Json.Decode.Pipeline exposing (hardcoded, required)
 import Json.Encode as Encode
 import Data.Log
-import Profile exposing (Profile)
-import Route
-import Session exposing (Session)
+import Data.Profile exposing (Profile)
+import Data.Route
+import Data.Session exposing (Session)
 import Task
-import Username as Username exposing (Username)
+import Data.Username as Username exposing (Username)
 import View.Loading
-import Viewer exposing (Viewer)
+import Data.Viewer exposing (Viewer)
 
 
 
@@ -61,7 +61,7 @@ init session =
       , status = Loading
       }
     , Cmd.batch
-        [ Data.Api.get Endpoint.user (Session.cred session) (Decode.field "user" formDecoder)
+        [ Data.Api.get Endpoint.user (Data.Session.cred session) (Decode.field "user" formDecoder)
             |> Http.send CompletedFormLoad
         , Task.perform (\_ -> PassedSlowLoadThreshold) View.Loading.slowThreshold
         ]
@@ -98,7 +98,7 @@ view : Model -> { title : String, content : Html Msg }
 view model =
     { title = "Settings"
     , content =
-        case Session.cred model.session of
+        case Data.Session.cred model.session of
             Just cred ->
                 div [ class "settings-page" ]
                     [ div [ class "container page" ]
@@ -271,12 +271,12 @@ update msg model =
 
         CompletedSave (Ok viewer) ->
             ( model
-            , Viewer.store viewer
+            , Data.Viewer.store viewer
             )
 
         GotSession session ->
             ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
         PassedSlowLoadThreshold ->
@@ -309,7 +309,7 @@ updateForm transform model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 
@@ -390,8 +390,8 @@ validateField (Trimmed form) field =
                     passwordLength =
                         String.length form.password
                 in
-                if passwordLength > 0 && passwordLength < Viewer.minPasswordChars then
-                    [ "password must be at least " ++ String.fromInt Viewer.minPasswordChars ++ " characters long." ]
+                if passwordLength > 0 && passwordLength < Data.Viewer.minPasswordChars then
+                    [ "password must be at least " ++ String.fromInt Data.Viewer.minPasswordChars ++ " characters long." ]
 
                 else
                     []
@@ -449,7 +449,7 @@ edit cred (Trimmed form) =
             Encode.object [ ( "user", encodedUser ) ]
                 |> Http.jsonBody
     in
-    Data.Api.settings cred body Viewer.decoder
+    Data.Api.settings cred body Data.Viewer.decoder
 
 
 nothingIfEmpty : String -> Maybe String

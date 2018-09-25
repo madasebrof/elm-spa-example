@@ -4,8 +4,8 @@ import A_Model exposing (..)
 import B_Message exposing (..)
 import Browser exposing (Document)
 import Browser.Navigation as Nav
+import Data.Session exposing (Session)
 import Html exposing (..)
-import Page exposing (Page)
 import Page.Article as Article
 import Page.Article.Editor as Editor
 import Page.Blank as Blank
@@ -15,7 +15,7 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Session exposing (Session)
+import View.Page exposing (Page)
 
 
 view : Model -> Document Msg
@@ -24,7 +24,7 @@ view model =
         viewPage page toMsg config =
             let
                 { title, body } =
-                    Page.view (Session.viewer (toSession model)) page config
+                    View.Page.view (Data.Session.viewer (toSession model)) page config
             in
             { title = title
             , body = List.map (Html.map toMsg) body
@@ -32,31 +32,31 @@ view model =
     in
     case model of
         Redirect _ ->
-            viewPage Page.Other (\_ -> Ignored) Blank.view
+            viewPage View.Page.Other (\_ -> Ignored) Blank.view
 
         NotFound _ ->
-            viewPage Page.Other (\_ -> Ignored) NotFound.view
+            viewPage View.Page.Other (\_ -> Ignored) NotFound.view
 
         Settings settings ->
-            viewPage Page.Other GotSettingsMsg (Settings.view settings)
+            viewPage View.Page.Other GotSettingsMsg (Settings.view settings)
 
         Home home ->
-            viewPage Page.Home GotHomeMsg (Home.view home)
+            viewPage View.Page.Home GotHomeMsg (Home.view home)
 
         Login login ->
-            viewPage Page.Other GotLoginMsg (Login.view login)
+            viewPage View.Page.Other GotLoginMsg (Login.view login)
 
         Register register ->
-            viewPage Page.Other GotRegisterMsg (Register.view register)
+            viewPage View.Page.Other GotRegisterMsg (Register.view register)
 
         Profile username profile ->
-            viewPage (Page.Profile username) GotProfileMsg (Profile.view profile)
+            viewPage (View.Page.Profile username) GotProfileMsg (Profile.view profile)
 
         Article article ->
-            viewPage Page.Other GotArticleMsg (Article.view article)
+            viewPage View.Page.Other GotArticleMsg (Article.view article)
 
         Editor Nothing editor ->
-            viewPage Page.NewArticle GotEditorMsg (Editor.view editor)
+            viewPage View.Page.NewArticle GotEditorMsg (Editor.view editor)
 
         Editor (Just _) editor ->
-            viewPage Page.Other GotEditorMsg (Editor.view editor)
+            viewPage View.Page.Other GotEditorMsg (Editor.view editor)

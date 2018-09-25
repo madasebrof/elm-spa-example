@@ -5,6 +5,8 @@ import B_Message exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import D_Command exposing (changeRouteTo, updateWith)
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
 import Page.Article as Article
 import Page.Article.Editor as Editor
 import Page.Home as Home
@@ -13,8 +15,6 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Route exposing (Route)
-import Session exposing (Session)
 import Url exposing (Url)
 
 
@@ -41,7 +41,7 @@ update msg model =
 
                         Just _ ->
                             ( model
-                            , Nav.pushUrl (Session.navKey (toSession model)) (Url.toString url)
+                            , Nav.pushUrl (Data.Session.navKey (toSession model)) (Url.toString url)
                             )
 
                 Browser.External href ->
@@ -50,7 +50,7 @@ update msg model =
                     )
 
         ( ChangedUrl url, _ ) ->
-            changeRouteTo (Route.fromUrl url) model
+            changeRouteTo (Data.Route.fromUrl url) model
 
         ( ChangedRoute route, _ ) ->
             changeRouteTo route model
@@ -85,7 +85,7 @@ update msg model =
 
         ( GotSession session, Redirect _ ) ->
             ( Redirect session
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
         ( _, _ ) ->

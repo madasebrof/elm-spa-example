@@ -1,6 +1,8 @@
 module A_Model exposing (Model(..), toSession)
 
 import Article.Slug exposing (Slug)
+import Data.Session exposing (Session)
+import Data.Username exposing (Username)
 import Page.Article as Article
 import Page.Article.Editor as Editor
 import Page.Home as Home
@@ -9,8 +11,6 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Session exposing (Session)
-import Username exposing (Username)
 
 
 type Model

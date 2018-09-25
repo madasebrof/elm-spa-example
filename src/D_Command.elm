@@ -3,6 +3,8 @@ module D_Command exposing (changeRouteTo, subscriptions, updateWith)
 import A_Model exposing (..)
 import B_Message exposing (..)
 import Data.Api
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
 import Page.Article as Article
 import Page.Article.Editor as Editor
 import Page.Home as Home
@@ -11,8 +13,6 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Route exposing (Route)
-import Session exposing (Session)
 
 
 subscriptions : Model -> Sub Msg
@@ -22,7 +22,7 @@ subscriptions model =
             Sub.none
 
         Redirect _ ->
-            Session.changes GotSession (Session.navKey (toSession model))
+            Data.Session.changes GotSession (Data.Session.navKey (toSession model))
 
         Settings settings ->
             Sub.map GotSettingsMsg (Settings.subscriptions settings)
@@ -56,41 +56,41 @@ changeRouteTo maybeRoute model =
         Nothing ->
             ( NotFound session, Cmd.none )
 
-        Just Route.Root ->
-            ( model, Route.replaceUrl (Session.navKey session) Route.Home )
+        Just Data.Route.Root ->
+            ( model, Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home )
 
-        Just Route.Logout ->
+        Just Data.Route.Logout ->
             ( model, Data.Api.logout )
 
-        Just Route.NewArticle ->
+        Just Data.Route.NewArticle ->
             Editor.initNew session
                 |> updateWith (Editor Nothing) GotEditorMsg model
 
-        Just (Route.EditArticle slug) ->
+        Just (Data.Route.EditArticle slug) ->
             Editor.initEdit session slug
                 |> updateWith (Editor (Just slug)) GotEditorMsg model
 
-        Just Route.Settings ->
+        Just Data.Route.Settings ->
             Settings.init session
                 |> updateWith Settings GotSettingsMsg model
 
-        Just Route.Home ->
+        Just Data.Route.Home ->
             Home.init session
                 |> updateWith Home GotHomeMsg model
 
-        Just Route.Login ->
+        Just Data.Route.Login ->
             Login.init session
                 |> updateWith Login GotLoginMsg model
 
-        Just Route.Register ->
+        Just Data.Route.Register ->
             Register.init session
                 |> updateWith Register GotRegisterMsg model
 
-        Just (Route.Profile username) ->
+        Just (Data.Route.Profile username) ->
             Profile.init session username
                 |> updateWith (Profile username) GotProfileMsg model
 
-        Just (Route.Article slug) ->
+        Just (Data.Route.Article slug) ->
             Article.init session slug
                 |> updateWith Article GotArticleMsg model
 

@@ -1,4 +1,4 @@
-module Profile exposing (Profile, avatar, bio, decoder)
+module Data.Profile exposing (Profile, avatar, bio, decoder)
 
 {-| A user's profile - potentially your own!
 
@@ -11,7 +11,7 @@ import Data.Avatar exposing (Avatar)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (required)
-import Username exposing (Username)
+import Data.Username exposing (Username)
 
 
 

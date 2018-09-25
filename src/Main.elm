@@ -9,7 +9,7 @@ import E_Init exposing (init)
 import F_Update exposing (update)
 import G_View exposing (view)
 import Json.Decode as Decode exposing (Value)
-import Viewer exposing (Viewer)
+import Data.Viewer exposing (Viewer)
 
 
 
@@ -23,7 +23,7 @@ import Viewer exposing (Viewer)
 
 main : Program Value Model Msg
 main =
-    Data.Api.application Viewer.decoder
+    Data.Api.application Data.Viewer.decoder
         { init = init
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink

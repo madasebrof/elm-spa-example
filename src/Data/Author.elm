@@ -40,10 +40,10 @@ import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode exposing (Value)
-import Profile exposing (Profile)
-import Route exposing (Route)
-import Username exposing (Username)
-import Viewer exposing (Viewer)
+import Data.Profile exposing (Profile)
+import Data.Route exposing (Route)
+import Data.Username exposing (Username)
+import Data.Viewer exposing (Viewer)
 
 
 {-| An author - either the current user, another user we're following, or
@@ -175,7 +175,7 @@ toggleFollowButton txt extraClasses msgWhenClicked uname =
             "btn btn-sm " ++ String.join " " extraClasses ++ " action-btn"
 
         caption =
-            "\u{00A0}" ++ txt ++ " " ++ Username.toString uname
+            "\u{00A0}" ++ txt ++ " " ++ Data.Username.toString uname
     in
     Html.button [ class classStr, onClick msgWhenClicked ]
         [ i [ class "ion-plus-round" ] []
@@ -190,8 +190,8 @@ toggleFollowButton txt extraClasses msgWhenClicked uname =
 decoder : Maybe Cred -> Decoder Author
 decoder maybeCred =
     Decode.succeed Tuple.pair
-        |> custom Profile.decoder
-        |> required "username" Username.decoder
+        |> custom Data.Profile.decoder
+        |> required "username" Data.Username.decoder
         |> Decode.andThen (decodeFromPair maybeCred)
 
 
@@ -230,5 +230,5 @@ profile, and that's it.
 -}
 view : Username -> Html msg
 view uname =
-    a [ class "author", Route.href (Route.Profile uname) ]
-        [ Username.toHtml uname ]
+    a [ class "author", Data.Route.href (Data.Route.Profile uname) ]
+        [ Data.Username.toHtml uname ]

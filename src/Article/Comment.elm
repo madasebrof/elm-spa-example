@@ -11,7 +11,7 @@ import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, required)
 import Json.Encode as Encode exposing (Value)
-import Profile exposing (Profile)
+import Data.Profile exposing (Profile)
 import Time
 
 

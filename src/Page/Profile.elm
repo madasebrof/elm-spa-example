@@ -14,16 +14,16 @@ import Html.Attributes exposing (..)
 import Http
 import View.Loading
 import Data.Log
-import Page
-import PaginatedList exposing (PaginatedList)
-import Profile exposing (Profile)
-import Route
-import Session exposing (Session)
+import View.Page
+import Data.PaginatedList exposing (PaginatedList)
+import Data.Profile exposing (Profile)
+import Data.Route
+import Data.Session exposing (Session)
 import Task exposing (Task)
 import Time
 import Url.Builder
-import Username exposing (Username)
-import Viewer exposing (Viewer)
+import Data.Username exposing (Username)
+import Data.Viewer exposing (Viewer)
 
 
 
@@ -59,7 +59,7 @@ init : Session -> Username -> ( Model, Cmd Msg )
 init session username =
     let
         maybeCred =
-            Session.cred session
+            Data.Session.cred session
     in
     ( { session = session
       , timeZone = Time.utc
@@ -110,18 +110,18 @@ fetchFeed : Session -> FeedTab -> Username -> Int -> Cmd Msg
 fetchFeed session feedTabs username page =
     let
         maybeCred =
-            Session.cred session
+            Data.Session.cred session
 
         firstParam =
             case feedTabs of
                 MyArticles ->
-                    Url.Builder.string "author" (Username.toString username)
+                    Url.Builder.string "author" (Data.Username.toString username)
 
                 FavoritedArticles ->
-                    Url.Builder.string "favorited" (Username.toString username)
+                    Url.Builder.string "favorited" (Data.Username.toString username)
 
         params =
-            firstParam :: PaginatedList.params { page = page, resultsPerPage = articlesPerPage }
+            firstParam :: Data.PaginatedList.params { page = page, resultsPerPage = articlesPerPage }
 
         expect =
             Feed.decoder maybeCred articlesPerPage
@@ -157,13 +157,13 @@ view model =
                     titleForOther (Author.username author)
 
                 Loading username ->
-                    titleForMe (Session.cred model.session) username
+                    titleForMe (Data.Session.cred model.session) username
 
                 LoadingSlowly username ->
-                    titleForMe (Session.cred model.session) username
+                    titleForMe (Data.Session.cred model.session) username
 
                 Failed username ->
-                    titleForMe (Session.cred model.session) username
+                    titleForMe (Data.Session.cred model.session) username
     in
     { title = title
     , content =
@@ -177,7 +177,7 @@ view model =
                         Author.username author
 
                     followButton =
-                        case Session.cred model.session of
+                        case Data.Session.cred model.session of
                             Just cred ->
                                 case author of
                                     IsViewer _ _ ->
@@ -195,14 +195,14 @@ view model =
                                 text ""
                 in
                 div [ class "profile-page" ]
-                    [ Page.viewErrors ClickedDismissErrors model.errors
+                    [ View.Page.viewErrors ClickedDismissErrors model.errors
                     , div [ class "user-info" ]
                         [ div [ class "container" ]
                             [ div [ class "row" ]
                                 [ div [ class "col-xs-12 col-md-10 offset-md-1" ]
-                                    [ img [ class "user-img", Data.Avatar.src (Profile.avatar profile) ] []
-                                    , h4 [] [ Username.toHtml username ]
-                                    , p [] [ text (Maybe.withDefault "" (Profile.bio profile)) ]
+                                    [ img [ class "user-img", Data.Avatar.src (Data.Profile.avatar profile) ] []
+                                    , h4 [] [ Data.Username.toHtml username ]
+                                    , p [] [ text (Maybe.withDefault "" (Data.Profile.bio profile)) ]
                                     , followButton
                                     ]
                                 ]
@@ -251,7 +251,7 @@ view model =
 
 titleForOther : Username -> String
 titleForOther otherUsername =
-    "Profile — " ++ Username.toString otherUsername
+    "Profile — " ++ Data.Username.toString otherUsername
 
 
 titleForMe : Maybe Cred -> Username -> String
@@ -382,7 +382,7 @@ update msg model =
                 Loaded feed ->
                     let
                         ( newFeed, subCmd ) =
-                            Feed.update (Session.cred model.session) subMsg feed
+                            Feed.update (Data.Session.cred model.session) subMsg feed
                     in
                     ( { model | feed = Loaded newFeed }
                     , Cmd.map GotFeedMsg subCmd
@@ -402,7 +402,7 @@ update msg model =
 
         GotSession session ->
             ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
         PassedSlowLoadThreshold ->
@@ -426,7 +426,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 

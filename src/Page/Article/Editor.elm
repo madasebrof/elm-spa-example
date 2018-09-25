@@ -13,10 +13,10 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import View.Loading
-import Page
-import Profile exposing (Profile)
-import Route
-import Session exposing (Session)
+import View.Page
+import Data.Profile exposing (Profile)
+import Data.Route
+import Data.Session exposing (Session)
 import Task exposing (Task)
 import Time
 
@@ -78,7 +78,7 @@ initEdit session slug =
       , status = Loading slug
       }
     , Cmd.batch
-        [ Article.fetch (Session.cred session) slug
+        [ Article.fetch (Data.Session.cred session) slug
             |> Http.toTask
             -- If init fails, store the slug that failed in the msg, so we can
             -- at least have it later to display the page's title properly!
@@ -103,7 +103,7 @@ view model =
             Nothing ->
                 "New Article"
     , content =
-        case Session.cred model.session of
+        case Data.Session.cred model.session of
             Just cred ->
                 viewAuthenticated cred model
 
@@ -273,8 +273,8 @@ update msg model =
 
         CompletedCreate (Ok article) ->
             ( model
-            , Route.Article (Article.slug article)
-                |> Route.replaceUrl (Session.navKey model.session)
+            , Data.Route.Article (Article.slug article)
+                |> Data.Route.replaceUrl (Data.Session.navKey model.session)
             )
 
         CompletedCreate (Err error) ->
@@ -284,8 +284,8 @@ update msg model =
 
         CompletedEdit (Ok article) ->
             ( model
-            , Route.Article (Article.slug article)
-                |> Route.replaceUrl (Session.navKey model.session)
+            , Data.Route.Article (Article.slug article)
+                |> Data.Route.replaceUrl (Data.Session.navKey model.session)
             )
 
         CompletedEdit (Err error) ->
@@ -318,7 +318,7 @@ update msg model =
 
         GotSession session ->
             ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
         PassedSlowLoadThreshold ->
@@ -436,7 +436,7 @@ updateForm transform model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 

@@ -3,25 +3,25 @@ module Page.Home exposing (Model, Msg, init, subscriptions, toSession, update, v
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
-import Data.Api exposing (Cred)
-import Data.Api.Endpoint as Endpoint
-import Data.Article as Article exposing (Article, Preview)
 import Article.Feed as Feed
 import Article.Tag as Tag exposing (Tag)
 import Browser.Dom as Dom
+import Data.Api exposing (Cred)
+import Data.Api.Endpoint as Endpoint
+import Data.Article as Article exposing (Article, Preview)
+import Data.Log
+import Data.PaginatedList exposing (PaginatedList)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
 import Http
-import View.Loading
-import Data.Log
-import Page
-import PaginatedList exposing (PaginatedList)
-import Session exposing (Session)
+import View.Page
+import Data.Session exposing (Session)
 import Task exposing (Task)
 import Time
 import Url.Builder
-import Username exposing (Username)
+import Data.Username exposing (Username)
+import View.Loading
 
 
 
@@ -57,7 +57,7 @@ init : Session -> ( Model, Cmd Msg )
 init session =
     let
         feedTab =
-            case Session.cred session of
+            case Data.Session.cred session of
                 Just cred ->
                     YourFeed cred
 
@@ -103,7 +103,7 @@ view model =
                                 [ div [ class "feed-toggle" ] <|
                                     List.concat
                                         [ [ viewTabs
-                                                (Session.cred model.session)
+                                                (Data.Session.cred model.session)
                                                 model.feedTab
                                           ]
                                         , Feed.viewArticles model.timeZone feed
@@ -285,7 +285,7 @@ update msg model =
                 Loaded feed ->
                     let
                         ( newFeed, subCmd ) =
-                            Feed.update (Session.cred model.session) subMsg feed
+                            Feed.update (Data.Session.cred model.session) subMsg feed
                     in
                     ( { model | feed = Loaded newFeed }
                     , Cmd.map GotFeedMsg subCmd
@@ -337,13 +337,13 @@ fetchFeed : Session -> FeedTab -> Int -> Task Http.Error Feed.Model
 fetchFeed session feedTabs page =
     let
         maybeCred =
-            Session.cred session
+            Data.Session.cred session
 
         decoder =
             Feed.decoder maybeCred articlesPerPage
 
         params =
-            PaginatedList.params { page = page, resultsPerPage = articlesPerPage }
+            Data.PaginatedList.params { page = page, resultsPerPage = articlesPerPage }
 
         request =
             case feedTabs of
@@ -383,7 +383,7 @@ scrollToTop =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 

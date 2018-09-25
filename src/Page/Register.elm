@@ -9,9 +9,9 @@ import Http
 import Json.Decode as Decode exposing (Decoder, decodeString, field, string)
 import Json.Decode.Pipeline exposing (optional)
 import Json.Encode as Encode
-import Route exposing (Route)
-import Session exposing (Session)
-import Viewer exposing (Viewer)
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
+import Data.Viewer exposing (Viewer)
 
 
 
@@ -65,7 +65,7 @@ view model =
                     [ div [ class "col-md-6 offset-md-3 col-xs-12" ]
                         [ h1 [ class "text-xs-center" ] [ text "Sign up" ]
                         , p [ class "text-xs-center" ]
-                            [ a [ Route.href Route.Login ]
+                            [ a [ Data.Route.href Data.Route.Login ]
                                 [ text "Have an account?" ]
                             ]
                         , ul [ class "error-messages" ]
@@ -177,12 +177,12 @@ update msg model =
 
         CompletedRegister (Ok viewer) ->
             ( model
-            , Viewer.store viewer
+            , Data.Viewer.store viewer
             )
 
         GotSession session ->
             ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.Home
+            , Data.Route.replaceUrl (Data.Session.navKey session) Data.Route.Home
             )
 
 
@@ -200,7 +200,7 @@ updateForm transform model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+    Data.Session.changes GotSession (Data.Session.navKey model.session)
 
 
 
@@ -277,8 +277,8 @@ validateField (Trimmed form) field =
                 if String.isEmpty form.password then
                     [ "password can't be blank." ]
 
-                else if String.length form.password < Viewer.minPasswordChars then
-                    [ "password must be at least " ++ String.fromInt Viewer.minPasswordChars ++ " characters long." ]
+                else if String.length form.password < Data.Viewer.minPasswordChars then
+                    [ "password must be at least " ++ String.fromInt Data.Viewer.minPasswordChars ++ " characters long." ]
 
                 else
                     []
@@ -314,4 +314,4 @@ register (Trimmed form) =
             Encode.object [ ( "user", user ) ]
                 |> Http.jsonBody
     in
-    Data.Api.register body Viewer.decoder
+    Data.Api.register body Data.Viewer.decoder

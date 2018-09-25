@@ -4,7 +4,7 @@ import Article.Slug as Slug exposing (Slug)
 import Data.CommentId exposing (CommentId)
 import Http
 import Url.Builder exposing (QueryParameter)
-import Username exposing (Username)
+import Data.Username exposing (Username)
 
 
 {-| Http.request, except it takes an Endpoint instead of a Url.
@@ -80,7 +80,7 @@ users =
 
 follow : Username -> Endpoint
 follow uname =
-    url [ "profiles", Username.toString uname, "follow" ] []
+    url [ "profiles", Data.Username.toString uname, "follow" ] []
 
 
 
@@ -114,7 +114,7 @@ articles params =
 
 profiles : Username -> Endpoint
 profiles uname =
-    url [ "profiles", Username.toString uname ] []
+    url [ "profiles", Data.Username.toString uname ] []
 
 
 feed : List QueryParameter -> Endpoint

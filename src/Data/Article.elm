@@ -17,6 +17,7 @@ import Article.Tag as Tag exposing (Tag)
 import Data.Api exposing (Cred)
 import Data.Api.Endpoint as Endpoint
 import Data.Author exposing (Author)
+import Data.Viewer exposing (Viewer)
 import Html exposing (Attribute, Html, i)
 import Html.Attributes exposing (class)
 import Html.Events exposing (stopPropagationOn)
@@ -26,10 +27,9 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (custom, hardcoded, required)
 import Json.Encode as Encode
 import Markdown
-import Profile exposing (Profile)
+import Data.Profile exposing (Profile)
 import Time
-import Username as Username exposing (Username)
-import Viewer exposing (Viewer)
+import Data.Username as Username exposing (Username)
 
 
 

@@ -1,16 +1,16 @@
-module Page exposing (Page(..), view, viewErrors)
+module View.Page exposing (Page(..), view, viewErrors)
 
 import Browser exposing (Document)
 import Data.Api exposing (Cred)
 import Data.Avatar
+import Data.Viewer exposing (Viewer)
 import Html exposing (Html, a, button, div, footer, i, img, li, nav, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, style)
 import Html.Events exposing (onClick)
-import Profile
-import Route exposing (Route)
-import Session exposing (Session)
-import Username exposing (Username)
-import Viewer exposing (Viewer)
+import Data.Profile
+import Data.Route exposing (Route)
+import Data.Session exposing (Session)
+import Data.Username exposing (Username)
 
 
 {-| Determines which navbar link (if any) will be rendered as active.
@@ -50,10 +50,10 @@ viewHeader : Page -> Maybe Viewer -> Html msg
 viewHeader page maybeViewer =
     nav [ class "navbar navbar-light" ]
         [ div [ class "container" ]
-            [ a [ class "navbar-brand", Route.href Route.Home ]
+            [ a [ class "navbar-brand", Data.Route.href Data.Route.Home ]
                 [ text "conduit" ]
             , ul [ class "nav navbar-nav pull-xs-right" ] <|
-                navbarLink page Route.Home [ text "Home" ]
+                navbarLink page Data.Route.Home [ text "Home" ]
                     :: viewMenu page maybeViewer
             ]
         ]
@@ -69,24 +69,24 @@ viewMenu page maybeViewer =
         Just viewer ->
             let
                 username =
-                    Viewer.username viewer
+                    Data.Viewer.username viewer
 
                 avatar =
-                    Viewer.avatar viewer
+                    Data.Viewer.avatar viewer
             in
-            [ linkTo Route.NewArticle [ i [ class "ion-compose" ] [], text "\u{00A0}New Post" ]
-            , linkTo Route.Settings [ i [ class "ion-gear-a" ] [], text "\u{00A0}Settings" ]
+            [ linkTo Data.Route.NewArticle [ i [ class "ion-compose" ] [], text "\u{00A0}New Post" ]
+            , linkTo Data.Route.Settings [ i [ class "ion-gear-a" ] [], text "\u{00A0}Settings" ]
             , linkTo
-                (Route.Profile username)
+                (Data.Route.Profile username)
                 [ img [ class "user-pic", Data.Avatar.src avatar ] []
-                , Username.toHtml username
+                , Data.Username.toHtml username
                 ]
-            , linkTo Route.Logout [ text "Sign out" ]
+            , linkTo Data.Route.Logout [ text "Sign out" ]
             ]
 
         Nothing ->
-            [ linkTo Route.Login [ text "Sign in" ]
-            , linkTo Route.Register [ text "Sign up" ]
+            [ linkTo Data.Route.Login [ text "Sign in" ]
+            , linkTo Data.Route.Register [ text "Sign up" ]
             ]
 
 
@@ -107,28 +107,28 @@ viewFooter =
 navbarLink : Page -> Route -> List (Html msg) -> Html msg
 navbarLink page route linkContent =
     li [ classList [ ( "nav-item", True ), ( "active", isActive page route ) ] ]
-        [ a [ class "nav-link", Route.href route ] linkContent ]
+        [ a [ class "nav-link", Data.Route.href route ] linkContent ]
 
 
 isActive : Page -> Route -> Bool
 isActive page route =
     case ( page, route ) of
-        ( Home, Route.Home ) ->
+        ( Home, Data.Route.Home ) ->
             True
 
-        ( Login, Route.Login ) ->
+        ( Login, Data.Route.Login ) ->
             True
 
-        ( Register, Route.Register ) ->
+        ( Register, Data.Route.Register ) ->
             True
 
-        ( Settings, Route.Settings ) ->
+        ( Settings, Data.Route.Settings ) ->
             True
 
-        ( Profile pageUsername, Route.Profile routeUsername ) ->
+        ( Profile pageUsername, Data.Route.Profile routeUsername ) ->
             pageUsername == routeUsername
 
-        ( NewArticle, Route.NewArticle ) ->
+        ( NewArticle, Data.Route.NewArticle ) ->
             True
 
         _ ->
